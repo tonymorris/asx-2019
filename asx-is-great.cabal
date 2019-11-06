@@ -22,6 +22,10 @@ library
   -- other-extensions:    
   build-depends:       base
                      , lens
+                     , tagsoup-navigate
+                     , optparse-applicative
+                     , fuzzy
+                     , wreq
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
