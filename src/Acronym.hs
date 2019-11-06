@@ -5,11 +5,11 @@ module Acronym where
 import Control.Lens
 
 data Acronym =
-  Acronym {
-    _name :: String -- the acronym name
-  , _meaning :: String -- the meaning
-  , _sources :: [String] -- the sources
-  } deriving (Eq, Show)
+  Acronym 
+    String -- the acronym name
+    String -- the meaning
+    [String] -- the sources
+  deriving (Eq, Show)
 
 acronymName :: Lens' Acronym String
 acronymName f (Acronym n m s) = fmap (\n' -> Acronym n' m s) (f n)
