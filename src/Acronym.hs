@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wall #-}
 
 module Acronym where
 
@@ -13,6 +13,9 @@ data Acronym =
 
 acronymName :: Lens' Acronym String
 acronymName f (Acronym n m s) = fmap (\n' -> Acronym n' m s) (f n)
+
+acronymMeaning :: Lens' Acronym String
+acronymMeaning f (Acronym n m s) = fmap (\m' -> Acronym n m' s) (f m)
 
 acronymSource :: Lens' Acronym [String]
 acronymSource f (Acronym n m s) = fmap (\s' -> Acronym n m s') (f s)

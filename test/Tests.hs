@@ -19,6 +19,12 @@ test_Acronym =
 genString :: MonadGen m => m String
 genString = Gen.list (Range.linearFrom 20 (-10) 10) Gen.unicodeAll
 
+genEmail :: MonadGen m => m String
+genEmail =
+  do  l <- Gen.list (Range.linearFrom 20 (-10) 10) Gen.alphaNum
+      r <- Gen.list (Range.linearFrom 20 (-10) 10) Gen.alphaNum
+      pure (l ++ '@' : r ++ ".com")
+
 genAcronym :: MonadGen m => m Acronym
 genAcronym =
   let r = Range.linearFrom 20 (-10) 10
