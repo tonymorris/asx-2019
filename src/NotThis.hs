@@ -35,6 +35,7 @@ class Hi k where
 (<<$>>) f x =
   lift0 f <<*>> x
 
+lawleftIdentity :: (Hi k, Eq (k y)) => k y -> Bool
 lawleftIdentity x = (>>>>>>>>=) x lift0 == x
 
 instance Hi ((->) t) where
@@ -165,6 +166,7 @@ blah = \m f ->
     Nothing -> Nothing
     Just x -> f x
 
+blah2 :: FilePath -> IO ()
 blah2 x =
   do  c <- readFile x
       length c `seq` writeFile x (reverse c) 
