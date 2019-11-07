@@ -29,6 +29,8 @@ library
                      , wreq
                      , bytestring
                      , transformers
+                     , mtl
+                     , split
 
   hs-source-dirs:      src
   default-language:    Haskell2010
