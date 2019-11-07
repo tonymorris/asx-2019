@@ -2,6 +2,7 @@
 
 module CASAPage where
 
+{-
 import Acronym
 import Acronyms
 import Control.Applicative
@@ -68,34 +69,38 @@ parsing =
   do  tbody
       a <- parseAcronym
       b <- parseAcronym
+      parseAcronyms
       return (a, b)
 
+
 parseAcronyms =
-  Acronyms <$> many parseAcronym  
+  Acronyms <$> some parseAcronym  
       
 parseAcronym =
-  do  firstChild
-      findContentUntil nextSibling (isTagBranch "td")
-      firstChild
-      n <- opticContent (_TagLeaf . _TagText)
-      parent
-      nextSibling
-      nextSibling
-      firstChild
-      m <- opticContent (_TagLeaf . _TagText)
-      parent
-      nextSibling
-      nextSibling
-      firstChild
-      s <- opticContent (_TagLeaf . _TagText)
-      parent
-      parent
-      nextSibling
-      nextSibling
-      pure (Acronym (trim n) (trim m) (parseSources (trim s)))
+  let txt = opticContent (_TagLeaf . _TagText) 
+  in  do  firstChild
+          findContentUntil nextSibling (isTagBranch "td")
+          firstChild
+          n <- txt
+          parent
+          nextSibling
+          nextSibling
+          firstChild
+          m <- txt
+          parent
+          nextSibling
+          nextSibling
+          firstChild
+          s <- txt
+          parent
+          parent
+          nextSibling
+          nextSibling
+          pure (Acronym (trim n) (trim m) (parseSources (trim s)))
 
 debug2 =
   fmap (over _1 (view tagTreePosContent)) . runTagTreePosState (breadthFirst (isTagBranch "tbody") undefined) <$> casaPage
 
 debug =
   fmap (over _1 (view tagTreePosContent)) . runTagTreePosState parsing <$> casaPage
+-}
