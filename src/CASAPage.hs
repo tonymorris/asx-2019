@@ -13,9 +13,91 @@ import Data.ByteString.Lazy(ByteString)
 import Data.ByteString.Lazy.Char8 as Char8(unpack)
 import Network.Wreq
 import Text.HTML.TagSoup.Navigate
+import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
 import Control.Monad.Reader.Class
 import Data.List.Split
+
+findTreeT ::
+  Monad f =>
+  ((TagTree str -> f Bool) -> TagTreePosStateT str f ())
+  -> (TagTree str -> f Bool)
+  -> TagTreePosStateT str f ()
+findTreeT k pr =
+  do  c <- liftTagTreePosState content
+      z <- lift (pr c)
+      unless z (liftTagTreePosState firstChild *> k pr)
+
+findTree ::
+  ((TagTree str -> Bool) -> TagTreePosState str ())
+  -> (TagTree str -> Bool)
+  -> TagTreePosState str ()
+findTree k pr =
+  findTreeT (\z -> k (runIdentity . z)) (Identity . pr)
+
+depthFirstFindTreeT ::
+  Monad f =>
+  (TagTree str -> f Bool)
+  -> TagTreePosStateT str f ()
+depthFirstFindTreeT =
+  findTreeT depthFirstFindForestT
+
+depthFirstFindTree ::
+  (TagTree str -> Bool)
+  -> TagTreePosState str ()
+depthFirstFindTree pr =
+  depthFirstFindTreeT (Identity . pr)
+
+depthFirstFindForestT ::
+  Monad f =>
+  (TagTree str -> f Bool)
+  -> TagTreePosStateT str f ()
+depthFirstFindForestT pr =
+  do  c <- liftTagTreePosState content
+      z <- lift (pr c)
+      unless z (depthFirstFindTreeT pr <|> (liftTagTreePosState nextSibling *> depthFirstFindForestT pr))
+
+depthFirstFindForest ::
+  (TagTree str -> Bool)
+  -> TagTreePosState str ()
+depthFirstFindForest pr =
+  depthFirstFindForestT (Identity . pr)
+
+breadthFirstFindTreeT ::
+  Monad f =>
+  (TagTree str -> f Bool)
+  -> TagTreePosStateT str f ()
+breadthFirstFindTreeT =
+  findTreeT breadthFirstFindForestT
+  
+breadthFirstFindTree ::
+  (TagTree str -> Bool)
+  -> TagTreePosState str ()
+breadthFirstFindTree pr =
+  breadthFirstFindTreeT (Identity . pr)
+
+breadthFirstFindForestT ::
+  Monad f =>
+  (TagTree str -> f Bool)
+  -> TagTreePosStateT str f ()
+breadthFirstFindForestT pr =
+  do  c <- liftTagTreePosState content
+      z <- lift (pr c)
+      unless z ((liftTagTreePosState nextSibling *> breadthFirstFindForestT pr) <|> breadthFirstFindTreeT pr)
+
+breadthFirstFindForest ::
+  (TagTree str -> Bool)
+  -> TagTreePosState str ()
+breadthFirstFindForest pr =
+  breadthFirstFindForestT (Identity . pr)
+
+debug3 :: IO (Maybe ByteString)
+debug3 =
+  let move :: TagTreePosState ByteString ByteString
+      move =
+        do  breadthFirstFindForest (isTagBranch "tbody")
+            opticContent _TagBranch_
+  in  runMaybeT (fmap (view (tagTreePosContent . _TagBranch_)) (casaPage >>= MaybeT . pure . execTagTreePosState move))
 
 casaPage :: MaybeT IO (TagTreePos ByteString)
 casaPage =
